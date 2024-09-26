@@ -165,7 +165,7 @@
 		},
 		{
 		"type": "help",
-		"helpvalue": "<h5><b>Optional</b></h5><p class='help-block'> Reference Readme file for more information.</p>"
+		"helpvalue": "<h5><b>Optional</b></h5><p class='help-block'> Reference Readme file <a target='blank' href='https://github.com/valiquette/homebridge-Ambient-realtime#readme'>here</a> for more information.</p>"
  		},
 	{
 		"key": "sensors",
