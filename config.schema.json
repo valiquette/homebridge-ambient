@@ -1,0 +1,184 @@
+{
+	"pluginAlias": "ambient",
+	"headerDisplay": "Homebridge plugin for Ambient Realtime",
+	"pluginType": "platform",
+	"singular": true,
+	"schema": {
+		"type": "object",
+		"properties": {
+			"name": {
+				"title": "Accessory Name",
+				"type": "string",
+				"required": true,
+				"placeholder": "Ambient",
+				"default": "Ambient"
+			},
+			"api_app_key": {
+				"title": "App Key",
+				"type": "string",
+				"required": true
+			},
+			"api_key": {
+				"title": "API Key",
+				"type": "string",
+				"required": true
+			},
+			"locationAddress": {
+				"title": "Location Address",
+				"type": "string",
+				"required": false,
+				"placeholder": "Leave blank for all locations"
+			},
+			"showOutdoor":{
+				"title": "Show Outdoor Temperature and Humidity",
+				"type": "boolean",
+				"required": true,
+				"default": true
+			},
+			"showIndoor":{
+				"title": "Show Indoor Temperature and Humidity",
+				"type": "boolean",
+				"required": true,
+				"default": true
+			},
+			"showAqin":{
+				"title": "Show Indoor Air Quality AQIN PM2.5 & PM10",
+				"type": "boolean",
+				"required": true,
+				"default": false
+			},
+			"showIndoorAir":{
+				"title": "Show Indoor Air Quality sensor",
+				"type": "boolean",
+				"required": true,
+				"default": false
+			},
+			"showOutdoorAir":{
+				"title": "Show Outdoor Air Quality sensor",
+				"type": "boolean",
+				"required": true,
+				"default": false
+			},
+			"showCo2":{
+				"title": "Show CO2 sensor",
+				"type": "boolean",
+				"required": true,
+				"default": false
+			},
+			"sensors": {
+				"title": "Sensors",
+				"type": "array",
+				"required": true,
+				"items": {
+					"title": "Custom Sensor",
+					"type": "object",
+					"properties": {
+						"name": {
+							"title": "Name for this sensor",
+							"type": "string",
+							"minLength": 3,
+							"required": true,
+							"placeholder": "Wind"
+						},
+						"dataPoint": {
+							"title": "Data point to be measured for this sensor",
+							"type": "string",
+							"minLength": 2,
+							"required": true,
+							"placeholder": "windspeedmph"
+						},
+						"threshold": {
+							"title": "threshold exceeded to trigger detection",
+							"type": "number",
+							"required": true,
+							"placeholder": 4
+						},
+						"type": {
+							"title": "Show as sensor type",
+							"type": "integer",
+							"required": true,
+							"default": 0,
+							"description": "Select the controls to display in HomeKit.",
+							"oneOf": [
+								{
+									"title": "Motion",
+									"enum": [0]
+								},
+								{
+									"title": "Occupancy",
+									"enum": [1]
+								}
+							]
+						}
+					}
+				}
+			}
+		}
+	},
+	"layout": [
+		{
+			"type": "help",
+			"helpvalue": "<h4><b>Required settings<b/></h4>"
+		},
+		{
+			"type": "flex",
+			"flex-flow": "row wrap",
+			"items": [
+				"name"
+			]
+		},
+		{
+			"type": "flex",
+			"items": [
+				"api_app_key",
+				"api_key"
+			]
+		},
+		{
+			"type": "help",
+			"helpvalue": "<p class='help-block'> Visit Ambient.net <a target='blank' href='https://ambientweather.net/account/keys'>here</a> for instruction on obtaining your Application and API keys.</p>"
+		},
+		{
+      "type": "flex",
+      "flex-flow": "row wrap",
+      "items": [
+        "locationAddress"
+      ]
+		},
+		{
+			"type": "help",
+			"helpvalue": "<h6><b>Location Support</b></h6><p class='help-block'> If you have more than one location and want to display them in separate Homebridge/HomeKit homes you can retrive only the devices at this loction name otherwise leave blank.<br/>The location must match the location configured in the Ambient.net app, review the log file to see the adresses as configured in the Ambient app.</p>"
+		},
+		{
+			"type": "fieldset",
+			"title": "Homekit Accessories",
+			"description": "Expand to expose devices to show in Homekit",
+			"expandable": true,
+			"items": [
+				"showOutdoor",
+				"showIndoor",
+				"showAqin",
+				"showIndoorAir",
+				"showOutdoorAir",
+				"showCo2"
+			]
+		},
+		{
+		"type": "help",
+		"helpvalue": "<h5><b>Optional</b></h5><p class='help-block'> Reference Readme file for more information.</p>"
+ 		},
+	{
+		"key": "sensors",
+		"type": "tabarray",
+		"title": "{{ value.name || 'new Sensor' }}",
+		"description": "Create custom sensors to show in Homekit",
+		"expandable": true,
+		"items": [
+			"sensors[].name",
+			"sensors[].dataPoint",
+			"sensors[].threshold",
+			"sensors[].type"
+				]
+	}
+	]
+}
