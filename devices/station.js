@@ -15,9 +15,9 @@ class station {
 		}
 		weatherStation.getService(Service.AccessoryInformation)
 			.setCharacteristic(Characteristic.Name, device.info.name)
-			.setCharacteristic(Characteristic.Manufacturer, "Ambient") //depracated ?
-			.setCharacteristic(Characteristic.SerialNumber, device.macAddress) //depracated ?
-			.setCharacteristic(Characteristic.Model, "WS-4000") //depracated ?
+			.setCharacteristic(Characteristic.Manufacturer, "Ambient")
+			.setCharacteristic(Characteristic.SerialNumber, device.macAddress)
+			.setCharacteristic(Characteristic.Model, "WS-4000")
 
 		let name ='Outdoor'
 

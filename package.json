@@ -24,7 +24,8 @@
 		"ambient",
 		"weather",
 		"air quality",
-		"co2"
+		"co2",
+		"leak"
 	],
 	"author": "John Valiquette",
 	"license": "MIT",

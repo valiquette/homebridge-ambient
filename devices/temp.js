@@ -6,38 +6,14 @@ class temp {
 	}
 
 	createAccessory(device, uuid, indoorSensor, name) {
-		let index = name.substring(name.length-1)
-		let temp
-		let humdidity
-		let batt
-		if(device.lastData.tempinf){
-			index=0
+		let index = name.substring(name.length-1)*1
+		if(!Number.isInteger(index)){
+			index='in'
 		}
-		switch (index) {
-			case 0:
-				temp = ((device.lastData.tempinf- 32 + .01) * 5 / 9).toFixed(1)
-				humdidity = device.lastData.humidityin
-				batt = !device.lastData.battin
-				break
-			case 1: {
-				temp = ((device.lastData.temp1inf- 32 + .01) * 5 / 9).toFixed(1)
-				humdidity = device.lastData.humidity1in
-				batt = !device.lastData.batt1in
-			}
-				break
-			case 2: {
-				temp = ((device.lastData.temp2inf- 32 + .01) * 5 / 9).toFixed(1)
-				hum = device.lastData.humidity2in
-				batt = !device.lastData.batt2in
-			}
-			break
-			case 3: {
-				temp = ((device.lastData.temp3inf- 32 + .01) * 5 / 9).toFixed(1)
-				humdidity = device.lastData.humidity3in
-				batt = !device.lastData.batt3in
-			}
-				break
-		}
+
+		let temp = ((device.lastData[`temp${index}f`]- 32 + .01) * 5 / 9).toFixed(1)
+		let humdidity = device.lastData[`humidity${index}`]
+		let batt = !device.lastData[`batt${index}`]  //1=OK, 0=Low
 
 		if(!indoorSensor){
 			this.log.info('Adding temp & humidity sensor for %s', device.info.name)
@@ -48,9 +24,9 @@ class temp {
 		}
 		indoorSensor.getService(Service.AccessoryInformation)
 			.setCharacteristic(Characteristic.Name, device.info.name)
-			.setCharacteristic(Characteristic.Manufacturer, "Ambient") //depracated ?
-			.setCharacteristic(Characteristic.SerialNumber, device.macAddress) //depracated ?
-			.setCharacteristic(Characteristic.Model, "TH") //depracated ?
+			.setCharacteristic(Characteristic.Manufacturer, "Ambient")
+			.setCharacteristic(Characteristic.SerialNumber, device.macAddress)
+			.setCharacteristic(Characteristic.Model, "WH32")
 
 		let tempSensor=indoorSensor.getService(Service.TemperatureSensor)
 		if(!tempSensor){

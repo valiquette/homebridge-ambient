@@ -36,33 +36,38 @@
 				"default": true
 			},
 			"showIndoor":{
-				"title": "Show Indoor Temperature and Humidity",
+				"title": "Show Indoor Temperature and Humidity WH32B",
 				"type": "boolean",
 				"required": true,
 				"default": true
 			},
 			"showAqin":{
-				"title": "Show Indoor Air Quality AQIN PM2.5 & PM10",
+				"title": "Show Indoor Air Quality AQIN",
 				"type": "boolean",
 				"required": true,
 				"default": false
 			},
 			"showIndoorAir":{
-				"title": "Show Indoor Air Quality sensor",
+				"title": "Show Indoor Air Quality sensor PM25IN",
 				"type": "boolean",
 				"required": true,
 				"default": false
 			},
 			"showOutdoorAir":{
-				"title": "Show Outdoor Air Quality sensor",
+				"title": "Show Outdoor Air Quality sensor PM25",
 				"type": "boolean",
 				"required": true,
 				"default": false
 			},
-			"showCo2":{
-				"title": "Show CO2 sensor",
+			"showOtherTemp":{
+				"title": "Show additional Temperature and Humidity sensors WH31P, WH31PF, WH31E, WH51RF",
 				"type": "boolean",
 				"required": true,
+				"default": false
+			},
+			"showLeak":{
+				"title": "Show Leak Sensors WH31LA",
+				"type": "boolean",
 				"default": false
 			},
 			"sensors": {
@@ -160,7 +165,8 @@
 				"showAqin",
 				"showIndoorAir",
 				"showOutdoorAir",
-				"showCo2"
+				"showOtherTemp",
+				"showLeak"
 			]
 		},
 		{

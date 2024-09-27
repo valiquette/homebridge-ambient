@@ -18,12 +18,11 @@ class motion {
 		}
 		motionSensor.getService(Service.AccessoryInformation)
 			.setCharacteristic(Characteristic.Name, device.info.name)
-			.setCharacteristic(Characteristic.Manufacturer, "Ambient") //depracated ?
-			.setCharacteristic(Characteristic.SerialNumber, device.macAddress) //depracated ?
-			.setCharacteristic(Characteristic.Model, "WS") //depracated ?
+			.setCharacteristic(Characteristic.Manufacturer, "Ambient")
+			.setCharacteristic(Characteristic.SerialNumber, device.macAddress)
+			.setCharacteristic(Characteristic.Model, "WS")
 			.setCharacteristic(Characteristic.ProductData, "motion")
 
-		//let sensor=motionSensor.getService(Service.MotionSensor)
 		let sensor=motionSensor.getService(Service.MotionSensor)
 		if(!sensor){
 			sensor = new Service.MotionSensor(newSensor.name)
