@@ -18,7 +18,7 @@ class motion {
 		}
 		motionSensor.getService(Service.AccessoryInformation)
 			.setCharacteristic(Characteristic.Name, device.info.name)
-			.setCharacteristic(Characteristic.Manufacturer, "Ambient")
+			.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
 			.setCharacteristic(Characteristic.SerialNumber, device.macAddress)
 			.setCharacteristic(Characteristic.Model, "WS")
 			.setCharacteristic(Characteristic.ProductData, "motion")

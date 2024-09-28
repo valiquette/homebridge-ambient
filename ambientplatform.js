@@ -37,6 +37,8 @@ class ambientPlatform {
 		this.showLeak=config.showLeak
 		this.maxLeak=config.maxLeak ? config.maxLeak : 4
 		this.maxTemp=config.maxtemp ? config.maxTemp : 8
+		this.manufacturer=config.manufacturer ? config.manufacturer : "Ambient"
+		this.station=config.station ? config.station : "WS4000"
 
 
 		this.endpoint = 'https://rt2.ambientweather.net'
@@ -101,17 +103,17 @@ class ambientPlatform {
 
 	  socket.on('data',(data) => {
 		//this.log.debug('data',JSON.stringify(data,null,2))
-		this.log.debug('data recieved',data.date)
+		//this.log.debug('data recieved',data.date)
 		/*
 		//test
-		data.temp1f=96.0
-		data.batt1=1 //batt1...batt10 - OK/Low indication, Int, 1=OK, 0=Low (Meteobridge Users 1=Low, 0=OK)
-		data.humidity1=30
-		data.leak1=2
-		data.batleak1=0 //batleak1...batleak4 - Leak Detector Battery - 1=Low 0=OK
-		data.pm25=50
-		data.batt_25=1
-		data.pm25_in=100
+			data.temp1f=96.0
+			data.batt1=1 //batt1...batt10 - OK/Low indication, Int, 1=OK, 0=Low (Meteobridge Users 1=Low, 0=OK)
+			data.humidity1=30
+			data.leak1=2
+			data.batleak1=0 //batleak1...batleak4 - Leak Detector Battery - 1=Low 0=OK
+			data.pm25=50
+			data.batt_25=1
+			data.pm25_in=100
 		//test
 		*/
 		this.updateStatus(data)
@@ -126,14 +128,14 @@ class ambientPlatform {
 				this.log('Found a match for configured location %s', device.info.coords.address.split(',')[0] )
 				/*
 				//test
-				device.lastData.temp1f=69.0
-				device.lastData.humidity1=20
-				device.lastData.batt1=1
-				device.lastData.leak1=0
-				device.lastData.batleak1=0
-				device.lastData.pm25=22
-				device.lastData.batt_25=1
-				device.lastData.pm25_in=80
+					device.lastData.temp1f=69.0
+					device.lastData.humidity1=20
+					device.lastData.batt1=1
+					device.lastData.leak1=0
+					device.lastData.batleak1=0
+					device.lastData.pm25=22
+					device.lastData.batt_25=1
+					device.lastData.pm25_in=80
 				//test
 				*/
 
