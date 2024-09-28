@@ -1,4 +1,3 @@
-
 class leak {
 	constructor(platform, log) {
 		this.log = log

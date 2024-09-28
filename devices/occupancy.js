@@ -1,4 +1,3 @@
-
 class occupancy {
 	constructor(platform, log) {
 		this.log = log

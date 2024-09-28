@@ -38,7 +38,7 @@ class ambientPlatform {
 		this.maxLeak=config.maxLeak ? config.maxLeak : 4
 		this.maxTemp=config.maxtemp ? config.maxTemp : 8
 		this.manufacturer=config.manufacturer ? config.manufacturer : "Ambient"
-		this.station=config.station ? config.station : "WS4000"
+		this.weaterStation=config.station ? config.station : "WS4000"
 
 
 		this.endpoint = 'https://rt2.ambientweather.net'

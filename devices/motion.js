@@ -1,4 +1,3 @@
-
 class motion {
 	constructor(platform, log) {
 		this.log = log

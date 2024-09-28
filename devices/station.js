@@ -1,4 +1,3 @@
-
 class station {
 	constructor(platform, log) {
 		this.log = log
@@ -17,7 +16,7 @@ class station {
 			.setCharacteristic(Characteristic.Name, device.info.name)
 			.setCharacteristic(Characteristic.Manufacturer,	this.manufacturer)
 			.setCharacteristic(Characteristic.SerialNumber, device.macAddress)
-			.setCharacteristic(Characteristic.Model, this.station)
+			.setCharacteristic(Characteristic.Model, this.weaterStation)
 
 		let name ='Outdoor'
 

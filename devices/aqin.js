@@ -1,4 +1,3 @@
-
 class aqin {
 	constructor(platform, log) {
 		this.log = log

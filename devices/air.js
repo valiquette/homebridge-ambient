@@ -1,4 +1,3 @@
-
 class air {
 	constructor(platform, log) {
 		this.log = log

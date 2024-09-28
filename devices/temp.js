@@ -1,4 +1,3 @@
-
 class temp {
 	constructor(platform, log) {
 		this.log = log
