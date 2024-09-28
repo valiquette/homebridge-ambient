@@ -1,7 +1,8 @@
-class air {
-	constructor(platform, log) {
+export default class air {
+	constructor(platform, log, api) {
 		this.log = log
 		this.platform = platform
+		this.api = api
 	}
 	createAccessory(device, uuid, airSensorX, type) {
 		let name='Outdoor Air Quality'
@@ -15,71 +16,71 @@ class air {
 		}
 		if(!airSensorX){
 			this.log.info('Adding air quality sensor for %s', device.info.name)
-			airSensorX = new PlatformAccessory(device.info.name, uuid)
+			airSensorX = new this.api.platformAccessory(device.info.name, uuid)
 		}
 		else{
 			this.log.debug('update Accessory %s AQIN', device.info.name)
 		}
-		airSensorX.getService(Service.AccessoryInformation)
-			.setCharacteristic(Characteristic.Name, device.info.name)
-			.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
-			.setCharacteristic(Characteristic.SerialNumber, device.macAddress)
-			.setCharacteristic(Characteristic.Model, "WS45")
+		airSensorX.getService(this.api.hap.Service.AccessoryInformation)
+			.setCharacteristic(this.api.hap.Charateristic.Name, device.info.name)
+			.setCharacteristic(this.api.hap.Charateristic.Manufacturer, this.platform.manufacturer)
+			.setCharacteristic(this.api.hap.Charateristic.SerialNumber, device.macAddress)
+			.setCharacteristic(this.api.hap.Charateristic.Model, "WS45")
 
-		let airSensor=airSensorX.getService(Service.AirQualitySensor)
+		let airSensor=airSensorX.getService(this.api.hap.Service.AirQualitySensor)
 		if(!airSensor){
-			airSensor = new Service.AirQualitySensor(name)
+			airSensor = new this.api.hap.Service.AirQualitySensor(name)
 			airSensorX.addService(airSensor)
-			airSensor.addCharacteristic(Characteristic.ConfiguredName)
-			airSensor.setCharacteristic(Characteristic.ConfiguredName, device.info.name+' '+name)
+			airSensor.addCharacteristic(this.api.hap.Charateristic.ConfiguredName)
+			airSensor.setCharacteristic(this.api.hap.Charateristic.ConfiguredName, device.info.name+' '+name)
 			airSensor
-			.getCharacteristic(Characteristic.AirQuality)
+			.getCharacteristic(this.api.hap.Charateristic.AirQuality)
 			.on('get', this.getStatusAir.bind(this, airSensor))
 		}
 
-			let aqi=Characteristic.AirQuality.UNKNOWN
-			if(device.lastData.aqi_pm25_aqin >300) {aqi=Characteristic.AirQuality.POOR}
-			else if(device.lastData.aqi_pm25_aqin >200) {aqi=Characteristic.AirQuality.POOR}
-			else if(device.lastData.aqi_pm25_aqin >150) {aqi=Characteristic.AirQuality.INFERIOR}
-			else if(device.lastData.aqi_pm25_aqin >100) {aqi=Characteristic.AirQuality.FAIR}
-			else if(device.lastData.aqi_pm25_aqin >50) {aqi=Characteristic.AirQuality.GOOD}
-			else if(device.lastData.aqi_pm25_aqin >0) {aqi=Characteristic.AirQuality.EXCELLENT}
+			let aqi=this.api.hap.Charateristic.AirQuality.UNKNOWN
+			if(device.lastData.aqi_pm25_aqin >300) {aqi=this.api.hap.Charateristic.AirQuality.POOR}
+			else if(device.lastData.aqi_pm25_aqin >200) {aqi=this.api.hap.Charateristic.AirQuality.POOR}
+			else if(device.lastData.aqi_pm25_aqin >150) {aqi=this.api.hap.Charateristic.AirQuality.INFERIOR}
+			else if(device.lastData.aqi_pm25_aqin >100) {aqi=this.api.hap.Charateristic.AirQuality.FAIR}
+			else if(device.lastData.aqi_pm25_aqin >50) {aqi=this.api.hap.Charateristic.AirQuality.GOOD}
+			else if(device.lastData.aqi_pm25_aqin >0) {aqi=this.api.hap.Charateristic.AirQuality.EXCELLENT}
 			airSensor
-				.setCharacteristic(Characteristic.Name, device.info.name+' '+name)
-				.setCharacteristic(Characteristic.StatusFault, Characteristic.StatusFault.NO_FAULT)
-				.setCharacteristic(Characteristic.StatusLowBattery, Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
-				.setCharacteristic(Characteristic.AirQuality, aqi)
-				.setCharacteristic(Characteristic.PM2_5Density, device.lastData[pm])
+				.setCharacteristic(this.api.hap.Charateristic.Name, device.info.name+' '+name)
+				.setCharacteristic(this.api.hap.Charateristic.StatusFault, this.api.hap.Charateristic.StatusFault.NO_FAULT)
+				.setCharacteristic(this.api.hap.Charateristic.StatusLowBattery, this.api.hap.Charateristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
+				.setCharacteristic(this.api.hap.Charateristic.AirQuality, aqi)
+				.setCharacteristic(this.api.hap.Charateristic.PM2_5Density, device.lastData[pm])
 
-		let batteryStatus=airSensorX.getService(Service.Battery)
+		let batteryStatus=airSensorX.getService(this.api.hap.Service.Battery)
 		if(!batteryStatus){
-			batteryStatus = new Service.Battery(name)
+			batteryStatus = new this.api.hap.Service.Battery(name)
 			airSensorX.addService(batteryStatus)
 
 			batteryStatus
-				.getCharacteristic(Characteristic.StatusLowBattery)
+				.getCharacteristic(this.api.hap.Charateristic.StatusLowBattery)
 				.on('get', this.getStatusLowBattery.bind(this, batteryStatus))
 		}
 			batteryStatus
-				.setCharacteristic(Characteristic.Name, device.info.name+' '+name)
-				.setCharacteristic(Characteristic.StatusLowBattery, batt)
+				.setCharacteristic(this.api.hap.Charateristic.Name, device.info.name+' '+name)
+				.setCharacteristic(this.api.hap.Charateristic.StatusLowBattery, batt)
 
 		return airSensorX
 	}
 
 	getStatusAir(sensorStatus, callback) {
-		if (sensorStatus.getCharacteristic(Characteristic.StatusFault).value == Characteristic.StatusFault.GENERAL_FAULT) {
+		if (sensorStatus.getCharacteristic(this.api.hap.Charateristic.StatusFault).value == this.api.hap.Charateristic.StatusFault.GENERAL_FAULT) {
 			callback('error')
 		}
 		else {
-			let currentValue = sensorStatus.getCharacteristic(Characteristic.AirQuality).value
+			let currentValue = sensorStatus.getCharacteristic(this.api.hap.Charateristic.AirQuality).value
 			callback(null, currentValue)
 		}
 	}
 
 	getStatusLowBattery(batteryStatus, callback) {
 		try{
-			let currentValue = batteryStatus.getCharacteristic(Characteristic.StatusLowBattery).value
+			let currentValue = batteryStatus.getCharacteristic(this.api.hap.Charateristic.StatusLowBattery).value
 			if (currentValue==1) {
 				this.log.warn('Battery Status Low')
 			}
@@ -90,4 +91,3 @@ class air {
 		}
 	}
 }
-module.exports = air

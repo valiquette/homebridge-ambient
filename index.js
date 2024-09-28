@@ -1,13 +1,16 @@
-const PlatformAmbient = require('homebridge-ambient-realtime/ambientplatform')
-const packageJson = require('./package')
+import PlatformAmbient from './ambientplatform.js'
+//import pluginInfo from './package.json' with { type: "json" }
 
-module.exports = (homebridge) => {
-	PlatformAccessory = homebridge.platformAccessory
-	Service = homebridge.hap.Service
-	Characteristic = homebridge.hap.Characteristic
-	UUIDGen = homebridge.hap.uuid
-	PluginName = packageJson.name
-	PluginVersion = packageJson.version
-	PlatformName = 'ambient'
+export default (homebridge) => {
+	let PlatformAccessory = homebridge.platformAccessory
+	let Service = homebridge.hap.Service
+	let Characteristic = homebridge.hap.Characteristic
+	let UUIDGen = homebridge.hap.uuid
+
+	//let PluginName = pluginInfo.name
+	//let PluginVersion = pluginInfo.version
+	let PluginName = 'homebridge-ambient-realtime' //pluginInfo.name
+	let PluginVersion = '0.1.3'
+	let PlatformName = 'ambient'
 	homebridge.registerPlatform(PluginName, PlatformName, PlatformAmbient, true)
 }

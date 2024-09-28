@@ -27,6 +27,7 @@
 		"co2",
 		"leak"
 	],
+	"type": "module",
 	"author": "John Valiquette",
 	"license": "MIT",
 	"bugs": {

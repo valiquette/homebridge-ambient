@@ -1,7 +1,8 @@
-class leak {
-	constructor(platform, log) {
+export default class leak {
+	constructor(platform, log, api) {
 		this.log = log
 		this.platform = platform
+		this.api = api
 	}
 
 	createAccessory(device, uuid, waterSensor, name) {
@@ -17,63 +18,63 @@ class leak {
 
 		if(!waterSensor){
 			this.log.info('Adding leak sensor for %s', device.info.name)
-			waterSensor = new PlatformAccessory(device.info.name, uuid)
+			waterSensor = new this.api.platformAccessory(device.info.name, uuid)
 		}
 		else{
 			this.log.debug('update Accessory %s leak sensor', device.info.name)
 		}
-		waterSensor.getService(Service.AccessoryInformation)
-			.setCharacteristic(Characteristic.Name, device.info.name)
-			.setCharacteristic(Characteristic.Manufacturer,	this.manufacturer)
-			.setCharacteristic(Characteristic.SerialNumber, device.macAddress)
-			.setCharacteristic(Characteristic.Model, "WH31LA")
+		waterSensor.getService(this.api.hap.Service.AccessoryInformation)
+			.setCharacteristic(this.api.hap.Charateristic.Name, device.info.name)
+			.setCharacteristic(this.api.hap.Charateristic.Manufacturer,	this.platform.manufacturer)
+			.setCharacteristic(this.api.hap.Charateristic.SerialNumber, device.macAddress)
+			.setCharacteristic(this.api.hap.Charateristic.Model, "WH31LA")
 
-		let leakSensor=waterSensor.getService(Service.TemperatureSensor)
+		let leakSensor=waterSensor.getService(this.api.hap.Service.TemperatureSensor)
 		if(!leakSensor){
-			leakSensor = new Service.LeakSensor(name)
+			leakSensor = new this.api.hap.Service.LeakSensor(name)
 			waterSensor.addService(leakSensor)
-			leakSensor.addCharacteristic(Characteristic.ConfiguredName)
-			leakSensor.setCharacteristic(Characteristic.ConfiguredName, device.info.name+' '+name)
+			leakSensor.addCharacteristic(this.api.hap.Charateristic.ConfiguredName)
+			leakSensor.setCharacteristic(this.api.hap.Charateristic.ConfiguredName, device.info.name+' '+name)
 			leakSensor
-				.getCharacteristic(Characteristic.LeakDetected)
+				.getCharacteristic(this.api.hap.Charateristic.LeakDetected)
 				.on('get', this.getStatusLeak.bind(this, leakSensor))
 		}
 			leakSensor
-				.setCharacteristic(Characteristic.Name, device.info.name+' '+name)
-				.setCharacteristic(Characteristic.StatusActive, active)
-				.setCharacteristic(Characteristic.StatusFault, Characteristic.StatusFault.NO_FAULT)
-				.setCharacteristic(Characteristic.StatusLowBattery, Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
-				.setCharacteristic(Characteristic.LeakDetected, leak)
+				.setCharacteristic(this.api.hap.Charateristic.Name, device.info.name+' '+name)
+				.setCharacteristic(this.api.hap.Charateristic.StatusActive, active)
+				.setCharacteristic(this.api.hap.Charateristic.StatusFault, this.api.hap.Charateristic.StatusFault.NO_FAULT)
+				.setCharacteristic(this.api.hap.Charateristic.StatusLowBattery, this.api.hap.Charateristic.StatusLowBattery.BATTERY_LEVEL_NORMAL)
+				.setCharacteristic(this.api.hap.Charateristic.LeakDetected, leak)
 
-		let batteryStatus=waterSensor.getService(Service.Battery)
+		let batteryStatus=waterSensor.getService(this.api.hap.Service.Battery)
 		if(!batteryStatus){
-			batteryStatus = new Service.Battery(name)
+			batteryStatus = new this.api.hap.Service.Battery(name)
 			waterSensor.addService(batteryStatus)
 
 			batteryStatus
-				.getCharacteristic(Characteristic.StatusLowBattery)
+				.getCharacteristic(this.api.hap.Charateristic.StatusLowBattery)
 				.on('get', this.getStatusLowBattery.bind(this, batteryStatus))
 		}
 			batteryStatus
-				.setCharacteristic(Characteristic.Name, device.info.name+' '+name)
-				.setCharacteristic(Characteristic.StatusLowBattery, batt)
+				.setCharacteristic(this.api.hap.Charateristic.Name, device.info.name+' '+name)
+				.setCharacteristic(this.api.hap.Charateristic.StatusLowBattery, batt)
 
 		return waterSensor
 	}
 
 	getStatusLeak(sensorStatus, callback) {
-		if (sensorStatus.getCharacteristic(Characteristic.StatusFault).value == Characteristic.StatusFault.GENERAL_FAULT) {
+		if (sensorStatus.getCharacteristic(this.api.hap.Charateristic.StatusFault).value == this.api.hap.Charateristic.StatusFault.GENERAL_FAULT) {
 			callback('error')
 		}
 		else {
-			let currentValue = sensorStatus.getCharacteristic(Characteristic.LeakDetected).value
+			let currentValue = sensorStatus.getCharacteristic(this.api.hap.Charateristic.LeakDetected).value
 			callback(null, currentValue)
 		}
 	}
 
 	getStatusLowBattery(batteryStatus, callback) {
 		try{
-			let currentValue = batteryStatus.getCharacteristic(Characteristic.StatusLowBattery).value
+			let currentValue = batteryStatus.getCharacteristic(this.api.hap.Charateristic.StatusLowBattery).value
 			if (currentValue==1) {
 				this.log.warn('Battery Status Low')
 			}
@@ -84,4 +85,3 @@ class leak {
 		}
 	}
 }
-module.exports = leak

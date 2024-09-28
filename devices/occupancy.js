@@ -1,7 +1,8 @@
-class occupancy {
-	constructor(platform, log) {
+export default class occupancy {
+	constructor(platform, log, api) {
 		this.log = log
 		this.platform = platform
+		this.api = api
 	}
 
 	createAccessory(device, uuid, occupancySensor, newSensor) {
@@ -10,52 +11,51 @@ class occupancy {
 
 		if(!occupancySensor){
 			this.log.info('Adding custom sensor for %s', device.info.name)
-			occupancySensor = new PlatformAccessory(device.info.name, uuid)
+			occupancySensor = new this.api.platformAccessory(device.info.name, uuid)
 		}
 		else{
 			this.log.debug('update Accessory %s custom sensor', device.info.name)
 		}
-		occupancySensor.getService(Service.AccessoryInformation)
-			.setCharacteristic(Characteristic.Name, device.info.name)
-			.setCharacteristic(Characteristic.Manufacturer,	this.manufacturer)
-			.setCharacteristic(Characteristic.SerialNumber, device.macAddress)
-			.setCharacteristic(Characteristic.Model, "WS")
-			.setCharacteristic(Characteristic.ProductData, "occupancy")
+		occupancySensor.getService(this.api.hap.Service.AccessoryInformation)
+			.setCharacteristic(this.api.hap.Charateristic.Name, device.info.name)
+			.setCharacteristic(this.api.hap.Charateristic.Manufacturer,	this.platform.manufacturer)
+			.setCharacteristic(this.api.hap.Charateristic.SerialNumber, device.macAddress)
+			.setCharacteristic(this.api.hap.Charateristic.Model, "WS")
+			.setCharacteristic(this.api.hap.Charateristic.ProductData, "occupancy")
 
-		//let sensor=occupancySensor.getService(Service.occupancySensor)
-		let sensor=occupancySensor.getService(Service.occupancySensor)
+		//let sensor=occupancySensor.getService(this.api.hap.Service.occupancySensor)
+		let sensor=occupancySensor.getService(this.api.hap.Service.occupancySensor)
 		if(!sensor){
-			sensor = new Service.OccupancySensor(newSensor.name)
+			sensor = new this.api.hap.Service.OccupancySensor(newSensor.name)
 			occupancySensor.addService(sensor)
-			sensor.addCharacteristic(Characteristic.ConfiguredName)
-			sensor.addCharacteristic(Characteristic.CurrentAmbientLightLevel)
-			sensor.setCharacteristic(Characteristic.ConfiguredName, device.info.name+' '+newSensor.name)
+			sensor.addCharacteristic(this.api.hap.Charateristic.ConfiguredName)
+			sensor.addCharacteristic(this.api.hap.Charateristic.CurrentAmbientLightLevel)
+			sensor.setCharacteristic(this.api.hap.Charateristic.ConfiguredName, device.info.name+' '+newSensor.name)
 			sensor
-				.getCharacteristic(Characteristic.OccupancyDetected)
+				.getCharacteristic(this.api.hap.Charateristic.OccupancyDetected)
 				.on('get', this.getStatusoccupancy.bind(this, sensor))
 			}
 			sensor
-				.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+				.getCharacteristic(this.api.hap.Charateristic.CurrentAmbientLightLevel)
 				.setProps({
 					minValue: 0,
 					maxValue: 10000
 				})
 			sensor
-				.setCharacteristic(Characteristic.Name, device.info.name+' '+newSensor.name)
-				.setCharacteristic(Characteristic.StatusFault, Characteristic.StatusFault.NO_FAULT)
-				.setCharacteristic(Characteristic.OccupancyDetected, occupancy)
-				.setCharacteristic(Characteristic.CurrentAmbientLightLevel, value)
+				.setCharacteristic(this.api.hap.Charateristic.Name, device.info.name+' '+newSensor.name)
+				.setCharacteristic(this.api.hap.Charateristic.StatusFault, this.api.hap.Charateristic.StatusFault.NO_FAULT)
+				.setCharacteristic(this.api.hap.Charateristic.OccupancyDetected, occupancy)
+				.setCharacteristic(this.api.hap.Charateristic.CurrentAmbientLightLevel, value)
 		return occupancySensor
 	}
 
 	getStatusoccupancy(sensorStatus, callback) {
-		if (sensorStatus.getCharacteristic(Characteristic.StatusFault).value == Characteristic.StatusFault.GENERAL_FAULT) {
+		if (sensorStatus.getCharacteristic(this.api.hap.Charateristic.StatusFault).value == this.api.hap.Charateristic.StatusFault.GENERAL_FAULT) {
 			callback('error')
 		}
 		else {
-			let currentValue = sensorStatus.getCharacteristic(Characteristic.OccupancyDetected).value
+			let currentValue = sensorStatus.getCharacteristic(this.api.hap.Charateristic.OccupancyDetected).value
 			callback(null, currentValue)
 		}
 	}
 }
-module.exports = occupancy
