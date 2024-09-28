@@ -3,13 +3,13 @@
 //https://github.com/ambient-weather/api-docs/wiki/Device-Data-Specs
 
 let io=require('socket.io-client')
-let station=require('homebridge-ambient-realtime/devices/station')
-let tempSensor=require('homebridge-ambient-realtime/devices/temp')
-let aqinSensor=require('homebridge-ambient-realtime/devices/aqin')
-let airSensor=require('homebridge-ambient-realtime/devices/air')
-let leakSensor=require('homebridge-ambient-realtime/devices/leak')
-let motionSensor=require('homebridge-ambient-realtime/devices/motion')
-let occupancySensor=require('homebridge-ambient-realtime/devices/occupancy')
+let station=require('./devices/station')
+let tempSensor=require('./devices/temp')
+let aqinSensor=require('./devices/aqin')
+let airSensor=require('./devices/air')
+let leakSensor=require('./devices/leak')
+let motionSensor=require('./devices/motion')
+let occupancySensor=require('./devices/occupancy')
 
 class ambientPlatform {
 	constructor(log, config, api){
@@ -105,7 +105,7 @@ class ambientPlatform {
 		//this.log.debug('data',JSON.stringify(data,null,2))
 		//this.log.debug('data recieved',data.date)
 		/*
-		//test
+		//for testing
 			data.temp1f=96.0
 			data.batt1=1 //batt1...batt10 - OK/Low indication, Int, 1=OK, 0=Low (Meteobridge Users 1=Low, 0=OK)
 			data.humidity1=30
@@ -114,7 +114,7 @@ class ambientPlatform {
 			data.pm25=50
 			data.batt_25=1
 			data.pm25_in=100
-		//test
+		//for testing
 		*/
 		this.updateStatus(data)
 	  })
@@ -127,7 +127,7 @@ class ambientPlatform {
 			if(this.locationAddress==device.info.coords.address.split(',')[0] || this.locationAddress==null) {
 				this.log('Found a match for configured location %s', device.info.coords.address.split(',')[0] )
 				/*
-				//test
+				//for testing
 					device.lastData.temp1f=69.0
 					device.lastData.humidity1=20
 					device.lastData.batt1=1
@@ -136,9 +136,8 @@ class ambientPlatform {
 					device.lastData.pm25=22
 					device.lastData.batt_25=1
 					device.lastData.pm25_in=80
-				//test
+				//for testing
 				*/
-
 				this.log.info('initial data from subscribed event',JSON.stringify(device.lastData,null,2));
 				if(this.showOutdoor){
 					uuid = UUIDGen.generate('station')
