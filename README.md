@@ -7,7 +7,7 @@
 
 ## About
 
-<br> Supports Ambiant weather station and additional sensors using Ambiant's realtime API, no polling required and incoming data events are recieved once evey minute.
+<br> Supports Ambiant weather station and additional sensors using Ambiant's realtime API, no polling required, incoming data events are recieved once evey minute.
 <br> If you have more than one weather station on account you may filter the weather stations for each home based on the location name assigned in the app for the location you want to display in HomeKit.
 <br> Once the plugin starts the last data set ambient has will be shown in the log as the inital data from the subscribe event. Any item on that list can be configured as a custom sensor using these values as the data points. ote the examples in the sample config below. The actual recieved value will be stored in the sensor as light level value.
 <br> I can only test agaist the devices I have available. Other sensors have only been tested only agaist documentaion.
