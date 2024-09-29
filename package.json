@@ -1,15 +1,15 @@
 {
 	"name": "homebridge-ambient-realtime",
 	"displayName": "Ambient",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "Ambient Realtime platform plugin for [Homebridge](https://github.com/nfarina/homebridge).",
 	"main": "index.js",
 	"dependencies": {
-		"socket.io-client": "^4.7.5"
+		"socket.io-client": "^4.8.0"
 	},
 	"engines": {
 		"homebridge": "^1.8.0 || ^2.0.0-beta.0",
-		"node": "^18.20.0 || ^20.17.0 || ^22.8.0"
+		"node": "^18.20.0 || ^20.17.0 || ^22.9.0"
 	},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
@@ -27,7 +27,7 @@
 		"co2",
 		"leak"
 	],
-	"type": "module",
+	"type":"commonjs",
 	"author": "John Valiquette",
 	"license": "MIT",
 	"bugs": {

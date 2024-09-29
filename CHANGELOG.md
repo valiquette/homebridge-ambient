@@ -1,5 +1,13 @@
 # Changes
 
+## 0.1.5
+refactor
+-fixes for verification
+
+## 0.1.4
+refactor
+-fixes for verification
+
 ## 0.1.3
 Initial
 -fixed crash condition
