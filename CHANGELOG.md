@@ -1,6 +1,6 @@
 # Changes
 
-## 0.1.5
+## 0.1.6
 refactor
 - fixed crash on load
 - refactored with typescript
