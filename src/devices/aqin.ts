@@ -1,7 +1,7 @@
 import type { CharacteristicValue, PlatformAccessory, Service, Characteristic} from 'homebridge';
 import type { ambientPlatform } from '../ambient_platform.js';
 
-export class aqin {
+export class aqinSensor {
 	public readonly Service!: typeof Service;
 	public readonly Characteristic!: typeof Characteristic;
 	constructor(

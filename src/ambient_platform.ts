@@ -2,10 +2,12 @@ import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAcces
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 import { station } from './devices/station.js'
-import { temp } from './devices/temp.js'
-import { aqin } from './devices/aqin.js'
-import { air } from './devices/air.js'
-import { leak } from './devices/leak.js'
+import { tempSensor } from './devices/temp.js'
+import { aqinSensor } from './devices/aqin.js'
+import { airSensor } from './devices/air.js'
+import { leakSensor } from './devices/leak.js'
+import { motionSensor } from './devices/motion.js'
+import { occupancySensor } from './devices/occupancy.js'
 
 import {io} from 'socket.io-client';
 
@@ -118,7 +120,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 	socket.on('data',(data) => {
 		//this.log.debug('data',JSON.stringify(data,null,2))
 		this.log.debug('data recieved',data.date)
-
+		/*
 		//for testing
 			data.temp1f=96.0
 			data.batt1=1 //batt1...batt10 - OK/Low indication, Int, 1=OK, 0=Low (Meteobridge Users 1=Low, 0=OK)
@@ -129,6 +131,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 			data.batt_25=1
 			data.pm25_in=100
 		//for testing
+		*/
 
 		this.updateStatus(data)
 	})
@@ -144,6 +147,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 			if(this.locationAddress==device.info.coords.address.split(',')[0] || this.locationAddress==null) {
 				this.log.info('Found a match for configured location %s', device.info.coords.address.split(',')[0] )
 
+				/*
 				//for testing
 					device.lastData.temp1f=69.0
 					device.lastData.humidity1=20
@@ -154,6 +158,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					device.lastData.batt_25=1
 					device.lastData.pm25_in=80
 				//for testing
+				*/
 
 				this.log.info('initial data from subscribed event',JSON.stringify(device.lastData,null,2));
 				if(this.showOutdoor && device.lastData.tempf){
@@ -182,7 +187,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid)
 					if(!this.accessories[index]){
 						this.log.debug('Registering platform accessory temp')
-						accessory  =  new temp(this).createAccessory(device, uuid, this.accessories[index], name)
+						accessory  =  new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name)
 						this.accessories.push(accessory)
 						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
 					}
@@ -205,7 +210,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid)
 					if(!this.accessories[index]){
 						this.log.debug('Registering platform accessory aqin')
-						accessory  =  new aqin(this).createAccessory(device, uuid, this.accessories[index])
+						accessory  =  new aqinSensor(this).createAccessory(device, uuid, this.accessories[index])
 						this.accessories.push(accessory)
 						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
 					}
@@ -228,7 +233,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid)
 					if(!this.accessories[index]){
 						this.log.debug('Registering platform accessory indoor air')
-						accessory  =  new air(this).createAccessory(device, uuid, this.accessories[index], 'in')
+						accessory  =  new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'in')
 						this.accessories.push(accessory)
 						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
 					}
@@ -250,7 +255,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 					index = this.accessories.findIndex(accessory => accessory.UUID === uuid)
 					if(!this.accessories[index]){
 						this.log.debug('Registering platform accessory outdoor air')
-						accessory  =  new air(this).createAccessory(device, uuid, this.accessories[index], 'out')
+						accessory  =  new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'out')
 						this.accessories.push(accessory)
 						this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
 					}
@@ -275,7 +280,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						if(device.lastData[`temp${n}f`]){
 							if(!this.accessories[index]){
 								this.log.debug('Registering platform accessory temp%s', index)
-								accessory  =  new temp(this).createAccessory(device, uuid, this.accessories[index], name)
+								accessory  =  new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name)
 								this.accessories.push(accessory)
 								this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
 							}
@@ -299,7 +304,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						if(device.lastData[`leak${n}`]!=null){
 							if(!this.accessories[index]){
 								this.log.debug('Registering platform accessory leak%s', n)
-								accessory  =  new leak(this).createAccessory(device, uuid, this.accessories[index], name)
+								accessory  =  new leakSensor(this).createAccessory(device, uuid, this.accessories[index], name)
 								this.accessories.push(accessory)
 								this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
 							}
@@ -314,14 +319,15 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						}
 					}
 				}
-/*
+
 				if(this.customSensor.length){
-					this.customSensor.forEach((sensor)=>{
+					this.customSensor.forEach((sensor: any)=>{
 						if(device.lastData[sensor.dataPoint]!=null){
 							uuid = this.api.hap.uuid.generate(sensor.name)
+							index = this.accessories.findIndex(accessory => accessory.UUID === uuid)
 							if(this.accessories[index]){
-								if((this.accessories[index].getService(this.api.hap.Service.AccessoryInformation).getCharacteristic(this.api.hap.Characteristic.ProductData).value == 'motion' && sensor.type==1)||
-									(this.accessories[index].getService(this.api.hap.Service.AccessoryInformation).getCharacteristic(this.api.hap.Characteristic.ProductData).value == 'occupancy' && sensor.type==0)){
+								if((this.accessories[index].getService(this.api.hap.Service.AccessoryInformation)!.getCharacteristic(this.api.hap.Characteristic.ProductData).value == 'motion' && sensor.type==1)||
+									(this.accessories[index].getService(this.api.hap.Service.AccessoryInformation)!.getCharacteristic(this.api.hap.Characteristic.ProductData).value == 'occupancy' && sensor.type==0)){
 									this.log.warn('Changing sensor between Motion and Occupancy, check room assignments in Homekit')
 									this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]])
 									delete this.accessories[index]
@@ -330,15 +336,17 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 							if(!this.accessories[index]){
 								this.log.debug('Registering platform accessory')
 								switch (sensor.type){
-									case 0: this.accessories[index]=this.motionSensor.createAccessory(device, uuid, this.accessories[index],sensor); break
-									case 1: this.accessories[index]=this.occupancySensor.createAccessory(device, uuid, this.accessories[index],sensor); break
+									case 0: accessory = new motionSensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break
+									case 1: accessory = new occupancySensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break
 								}
-								this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]])
+								this.accessories.push(accessory)
+								this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
 							}
 						}
 						else{
 							this.log.info('Skipping sensor not found')
 							uuid = this.api.hap.uuid.generate(sensor.name)
+							index = this.accessories.findIndex(accessory => accessory.UUID === uuid)
 							if(this.accessories[index]){
 								this.log.debug('Removed cached device',device.id)
 								this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]])
@@ -347,7 +355,6 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 						}
 					})
 				}
-			*/
 			}
 			else{
 				this.log.info('Skipping location %s does not match configured location %s', device.info.coords.address.split(',')[0], this.locationAddress )

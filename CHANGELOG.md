@@ -1,8 +1,13 @@
 # Changes
 
+## 0.1.6
+Initial
+- fixed crash condition when trying to add accessories
+- refactored in typescript
+
 ## 0.1.3
 Initial
--fixed crash condition
+- fixed crash condition
 
 ## 0.1.2
 Initial
