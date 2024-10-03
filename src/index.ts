@@ -8,7 +8,7 @@ import { PLATFORM_NAME } from './settings.js';
  */
 export default (api: API) => {
 
-	//api.registerPlatform(PluginName, PlatformName, PlatformAmbient)
+  //api.registerPlatform(PluginName, PlatformName, PlatformAmbient)
   api.registerPlatform(PLATFORM_NAME, ambientPlatform);
 };
 
