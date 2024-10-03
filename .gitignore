@@ -4,8 +4,7 @@ dist
 # System Files
 .DS_Store
 Thumbs.db
-~/,node_modules
-~/,vscode
+.vscode
 
 # ignore file
 package-lock.json
