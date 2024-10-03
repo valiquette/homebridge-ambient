@@ -1,5 +1,5 @@
-# Ignore compiled code
-dist
+# Ignore source code
+src
 
 # System Files
 .DS_Store
@@ -11,6 +11,21 @@ Thumbs.db
 package-lock.json
 
 # ------------- Defaults ------------- #
+
+# gitHub actions
+.github
+
+# eslint
+eslint.config.js
+
+# typescript
+tsconfig.json
+
+# vscode
+.vscode
+
+# nodemon
+nodemon.json
 
 # Logs
 logs
@@ -95,7 +110,6 @@ web_modules/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
@@ -127,6 +141,3 @@ dist
 .yarn/unplugged
 .yarn/build-state.yml
 .pnp.*
-
-# Webstorm
-.idea
