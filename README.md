@@ -55,6 +55,7 @@
                 "type": 1
             }
         ],
+        "showSocketData": false,
     "_bridge": {
         "username": "0E:43:35:74:24:77"
     },

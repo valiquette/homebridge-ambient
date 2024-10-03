@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
@@ -33,25 +32,28 @@ export class ambientPlatform implements DynamicPlatformPlugin {
   ){
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
+    this.genUUID = api.hap.uuid.generate;
+
     this.log.debug('Finished initializing platform:', config.name);
 
     this.timeStamp=new Date();
-    this.api_key=config.api_key;
-    this.api_app_key=config.api_app_key;
-    this.showOutdoor=config.showOutdoor;
-    this.showIndoor=config.showIndoor;
-    this.showAqin=config.showAqin;
-    this.showAirIn=config.showIndoorAir;
-    this.showAirOut=config.showOutdoorAir;
-    this.customSensor=config.sensors;
-    this.showOtherTemp=config.showOtherTemp;
-    this.showLeak=config.showLeak;
-    this.maxLeak=config.maxLeak ? config.maxLeak : 4;
-    this.maxTemp=config.maxtemp ? config.maxTemp : 8;
     this.endpoint = 'https://rt2.ambientweather.net';
+    this.api_key = config.api_key;
+    this.api_app_key = config.api_app_key;
+    this.showOutdoor = config.showOutdoor;
+    this.showIndoor = config.showIndoor;
+    this.showAqin = config.showAqin;
+    this.showAirIn = config.showIndoorAir;
+    this.showAirOut = config.showOutdoorAir;
+    this.customSensor = config.sensors;
+    this.showOtherTemp = config.showOtherTemp;
+    this.showLeak = config.showLeak;
+    this.maxLeak = config.maxLeak ? config.maxLeak : 4;
+    this.maxTemp = config.maxtemp ? config.maxTemp : 8;
+    this.showSocketData = config.showSocketData ? config.showSocketData : false;
 
     this.weatherStation=null;
-    this.locationAddress=config.locationAddress;
+    this.locationAddress = config.locationAddress;
     if(!config.api_key || !config.api_app_key){
       this.log.error('Valid API keys are required, please check the plugin config');
     }
@@ -98,10 +100,11 @@ export class ambientPlatform implements DynamicPlatformPlugin {
       this.log.info('Subscribing to Ambient Weather Realtime API...');
       socket.emit('subscribe', { apiKeys:[this.api_key] });
     });
+
     socket.on('disconnect', () => {
       this.log.info('closed socket id', socket.id );
       this.log.info('Disconected from Ambient Weather');
-      this.log.warn('Weather Station offline at %s! Sensors will show as non-responding in Homekit until the connection is restored.', new Date().toLocaleString());
+      this.log.warn('Weather Station offline at %s! Sensors will show as non-responding until the connection is restored.', new Date().toLocaleString());
       this.updatefault();
     });
 
@@ -116,7 +119,9 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 
     socket.on('data',(data) => {
       //this.log.debug('data',JSON.stringify(data,null,2))
-      this.log.debug('data recieved',data.date);
+      if(this.showSocketData){
+        this.log.debug('data recieved %s current outdoor temp %s ',data.date, data.tempf);
+      }
 
       /*
       //for testing
@@ -160,7 +165,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 
         this.log.info('initial data from subscribed event',JSON.stringify(device.lastData,null,2));
         if(this.showOutdoor && device.lastData.tempf){
-          uuid = this.api.hap.uuid.generate('station');
+          uuid = this.genUUID('station');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(!this.accessories[index]){
             this.log.debug('Registering platform accessory station');
@@ -169,7 +174,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
           }
         } else{
-          uuid = this.api.hap.uuid.generate('station');
+          uuid = this.genUUID('station');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             this.log.debug('Removed cached device', device.id);
@@ -180,7 +185,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 
         if(this.showIndoor && device.lastData.tempinf){
           name = 'indoor';
-          uuid = this.api.hap.uuid.generate(name);
+          uuid = this.genUUID(name);
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(!this.accessories[index]){
             this.log.debug('Registering platform accessory temp');
@@ -192,7 +197,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
           if(this.showIndoor){
             this.log.info('Skipping indoor, sensor not found');
           }
-          uuid = this.api.hap.uuid.generate('indoor');
+          uuid = this.genUUID('indoor');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             this.log.debug('Removed cached device indoor', device.id);
@@ -202,7 +207,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
         }
 
         if(this.showAqin && device.lastData.co2_in_aqin){
-          uuid = this.api.hap.uuid.generate('aqin');
+          uuid = this.genUUID('aqin');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(!this.accessories[index]){
             this.log.debug('Registering platform accessory aqin');
@@ -214,7 +219,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
           if(this.showAqin){
             this.log.info('Skipping aqin, sensor not found');
           }
-          uuid = this.api.hap.uuid.generate('aqin');
+          uuid = this.genUUID('aqin');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             this.log.debug('Removed cached device aqin', device.id);
@@ -224,7 +229,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
         }
 
         if(this.showAirIn && device.lastData.pm25_in){
-          uuid = this.api.hap.uuid.generate('air_in');
+          uuid = this.genUUID('air_in');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(!this.accessories[index]){
             this.log.debug('Registering platform accessory indoor air');
@@ -236,7 +241,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
           if(this.showAirIn){
             this.log.info('Skipping indoor air sensor not found');
           }
-          uuid = this.api.hap.uuid.generate('air_in');
+          uuid = this.genUUID('air_in');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             this.log.debug('Removed cached device aqin', device.id);
@@ -245,7 +250,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
           }
         }
         if(this.showAirOut && device.lastData.pm25){
-          uuid = this.api.hap.uuid.generate('air_out');
+          uuid = this.genUUID('air_out');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(!this.accessories[index]){
             this.log.debug('Registering platform accessory outdoor air');
@@ -257,7 +262,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
           if(this.showAirOut){
             this.log.info('Skipping outdoor air sensor not found');
           }
-          uuid = this.api.hap.uuid.generate('air_out');
+          uuid = this.genUUID('air_out');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             this.log.debug('Removed cached device aqin', device.id);
@@ -269,7 +274,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
         if(this.showOtherTemp){
           for (let n = 1; n <= this.maxTemp; n++) {
             name = 'temp'+n;
-            uuid = this.api.hap.uuid.generate(name);
+            uuid = this.genUUID(name);
             if(device.lastData[`temp${n}f`]){
               if(!this.accessories[index]){
                 this.log.debug('Registering platform accessory temp%s', index);
@@ -291,7 +296,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
         if(this.showLeak){
           for (let n = 1; n <= this.maxLeak; n++) {
             name = 'leak'+n;
-            uuid = this.api.hap.uuid.generate(name);
+            uuid = this.genUUID(name);
             index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
             if(device.lastData[`leak${n}`]!=null){
               if(!this.accessories[index]){
@@ -314,11 +319,12 @@ export class ambientPlatform implements DynamicPlatformPlugin {
         if(this.customSensor.length){
           this.customSensor.forEach((sensor: any)=>{
             if(device.lastData[sensor.dataPoint]!=null){
-              uuid = this.api.hap.uuid.generate(sensor.name);
+              uuid = this.genUUID(sensor.name);
               index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
               if(this.accessories[index]){
-                if((this.accessories[index].getService(this.api.hap.Service.AccessoryInformation)!.getCharacteristic(this.api.hap.Characteristic.ProductData).value === 'motion' && sensor.type ===1 )||
-									(this.accessories[index].getService(this.api.hap.Service.AccessoryInformation)!.getCharacteristic(this.api.hap.Characteristic.ProductData).value === 'occupancy' && sensor.type === 0)){
+
+                const checkType: any =this.accessories[index].getService(this.Service.AccessoryInformation)!.getCharacteristic(this.Characteristic.ProductData);
+                if((checkType.value === 'motion' && sensor.type ===1 )|| (checkType.value === 'occupancy' && sensor.type === 0)){
                   this.log.warn('Changing sensor between Motion and Occupancy, check room assignments in Homekit');
                   this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [this.accessories[index]]);
                   delete this.accessories[index];
@@ -335,7 +341,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
               }
             } else{
               this.log.info('Skipping sensor not found');
-              uuid = this.api.hap.uuid.generate(sensor.name);
+              uuid = this.genUUID(sensor.name);
               index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
               if(this.accessories[index]){
                 this.log.debug('Removed cached device',device.id);
@@ -363,188 +369,188 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 
     try{
       if(this.showOutdoor){
-        uuid = this.api.hap.uuid.generate('station');
+        uuid = this.genUUID('station');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
           this.weatherStation=this.accessories[index];
-          tempSensor=this.weatherStation.getService(this.api.hap.Service.TemperatureSensor);
-          tempSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          tempSensor.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature).updateValue(((data.tempf- 32 + .01) * 5 / 9).toFixed(1));
-          humditySensor=this.weatherStation.getService(this.api.hap.Service.HumiditySensor);
-          humditySensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          humditySensor.getCharacteristic(this.api.hap.Characteristic.CurrentRelativeHumidity).updateValue(data.humidity);
-          //batteryStatus=this.weatherStation.getService(this.api.hap.Service.Battery)
-          //batteryStatus.getCharacteristic(this.api.hap.Characteristic.StatusLowBattery).updateValue(!data.batt) // no outdoor battery
+          tempSensor=this.weatherStation.getService(this.Service.TemperatureSensor);
+          tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data.tempf- 32 + .01) * 5 / 9).toFixed(1));
+          humditySensor=this.weatherStation.getService(this.Service.HumiditySensor);
+          humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidity);
+          //batteryStatus=this.weatherStation.getService(this.Service.Battery)
+          //batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt) // no outdoor battery
         }
       }
 
       if(this.showIndoor && (data.tempinf)){
-        uuid = this.api.hap.uuid.generate('indoor');
+        uuid = this.genUUID('indoor');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
           this.weatherStation=this.accessories[index];
-          tempSensor=this.weatherStation.getService(this.api.hap.Service.TemperatureSensor);
-          tempSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          tempSensor.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature).updateValue(((data.tempinf- 32 + .01) * 5 / 9).toFixed(1));
-          humditySensor=this.weatherStation.getService(this.api.hap.Service.HumiditySensor);
-          humditySensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          humditySensor.getCharacteristic(this.api.hap.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
-          batteryStatus=this.weatherStation.getService(this.api.hap.Service.Battery);
-          batteryStatus.getCharacteristic(this.api.hap.Characteristic.StatusLowBattery).updateValue(!data.battin);
+          tempSensor=this.weatherStation.getService(this.Service.TemperatureSensor);
+          tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data.tempinf- 32 + .01) * 5 / 9).toFixed(1));
+          humditySensor=this.weatherStation.getService(this.Service.HumiditySensor);
+          humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
+          batteryStatus=this.weatherStation.getService(this.Service.Battery);
+          batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.battin);
         }
       }
 
       for (let n: number = 1; n <= this.maxTemp; n++) {
         if(data[`temp${n}f`]!=null){
-          uuid = this.api.hap.uuid.generate('temp'+n);
+          uuid = this.genUUID('temp'+n);
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             this.weatherStation=this.accessories[index];
-            tempSensor=this.weatherStation.getService(this.api.hap.Service.TemperatureSensor);
-            tempSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-            tempSensor.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature).updateValue(((data[`temp${n}f`]- 32 + .01) * 5 / 9).toFixed(1));
-            humditySensor=this.weatherStation.getService(this.api.hap.Service.HumiditySensor);
-            humditySensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-            humditySensor.getCharacteristic(this.api.hap.Characteristic.CurrentRelativeHumidity).updateValue(data[`humidity${n}`]);
-            batteryStatus=this.weatherStation.getService(this.api.hap.Service.Battery);
-            batteryStatus.getCharacteristic(this.api.hap.Characteristic.StatusLowBattery).updateValue(!data[`batt${n}`]);
+            tempSensor=this.weatherStation.getService(this.Service.TemperatureSensor);
+            tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+            tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data[`temp${n}f`]- 32 + .01) * 5 / 9).toFixed(1));
+            humditySensor=this.weatherStation.getService(this.Service.HumiditySensor);
+            humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+            humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data[`humidity${n}`]);
+            batteryStatus=this.weatherStation.getService(this.Service.Battery);
+            batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data[`batt${n}`]);
           }
         }
       }
 
       for (let n: number = 1; n <= this.maxLeak; n++) {
         if(data[`leak${n}`]!=null){
-          uuid = this.api.hap.uuid.generate('leak'+n);
+          uuid = this.genUUID('leak'+n);
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             this.weatherStation=this.accessories[index];
-            leakSensor=this.weatherStation.getService(this.api.hap.Service.LeakSensor);
+            leakSensor=this.weatherStation.getService(this.Service.LeakSensor);
             if(data[`leak${n}`] === 2){
-              leakSensor.getCharacteristic(this.api.hap.Characteristic.StatusActive).updateValue(false);
-              leakSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
-              batteryStatus=this.weatherStation.getService(this.api.hap.Service.Battery);
-              batteryStatus.getCharacteristic(this.api.hap.Characteristic.StatusLowBattery).updateValue(data[`batleak${n}`]);
+              leakSensor.getCharacteristic(this.Characteristic.StatusActive).updateValue(false);
+              leakSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+              batteryStatus=this.weatherStation.getService(this.Service.Battery);
+              batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(data[`batleak${n}`]);
             } else{
-              leakSensor.getCharacteristic(this.api.hap.Characteristic.StatusActive).updateValue(true);
-              leakSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-              leakSensor.getCharacteristic(this.api.hap.Characteristic.LeakDetected).updateValue(data[`leak${n}`]);
-              batteryStatus=this.weatherStation.getService(this.api.hap.Service.Battery);
-              batteryStatus.getCharacteristic(this.api.hap.Characteristic.StatusLowBattery).updateValue(data[`batleak${n}`]);
+              leakSensor.getCharacteristic(this.Characteristic.StatusActive).updateValue(true);
+              leakSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+              leakSensor.getCharacteristic(this.Characteristic.LeakDetected).updateValue(data[`leak${n}`]);
+              batteryStatus=this.weatherStation.getService(this.Service.Battery);
+              batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(data[`batleak${n}`]);
             }
           }
         }
       }
 
       if(this.showAqin && data.co2_in_aqin){
-        uuid = this.api.hap.uuid.generate('aqin');
+        uuid = this.genUUID('aqin');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
           this.weatherStation=this.accessories[index];
-          tempSensor=this.weatherStation.getService(this.api.hap.Service.TemperatureSensor);
-          tempSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          tempSensor.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature).updateValue(((data.tempinf- 32 + .01) * 5 / 9).toFixed(1));
+          tempSensor=this.weatherStation.getService(this.Service.TemperatureSensor);
+          tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          tempSensor.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(((data.tempinf- 32 + .01) * 5 / 9).toFixed(1));
 
-          humditySensor=this.weatherStation.getService(this.api.hap.Service.HumiditySensor);
-          humditySensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          humditySensor.getCharacteristic(this.api.hap.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
+          humditySensor=this.weatherStation.getService(this.Service.HumiditySensor);
+          humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
 
-          airSensor=this.weatherStation.getService(this.api.hap.Service.AirQualitySensor);
-          airSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          airSensor.getCharacteristic(this.api.hap.Characteristic.PM10Density).updateValue(data.pm10_in_aqin);
-          airSensor.getCharacteristic(this.api.hap.Characteristic.PM2_5Density).updateValue(data.pm25_in_aqin);
+          airSensor=this.weatherStation.getService(this.Service.AirQualitySensor);
+          airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          airSensor.getCharacteristic(this.Characteristic.PM10Density).updateValue(data.pm10_in_aqin);
+          airSensor.getCharacteristic(this.Characteristic.PM2_5Density).updateValue(data.pm25_in_aqin);
 
           if(data.aqi_pm25_aqin >300) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.POOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.POOR);
           } else if(data.aqi_pm25_aqin >200) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.POOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.POOR);
           } else if(data.aqi_pm25_aqin >150) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.INFERIOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.INFERIOR);
           } else if(data.aqi_pm25_aqin >100) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.FAIR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.FAIR);
           } else if(data.aqi_pm25_aqin >50) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.GOOD);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.GOOD);
           } else if(data.aqi_pm25_aqin >0) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.EXCELLENT);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.EXCELLENT);
           } else {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.UNKNOWN);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.UNKNOWN);
           }
 
-          co2Sensor=this.weatherStation.getService(this.api.hap.Service.CarbonDioxideSensor);
-          co2Sensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          co2Sensor.getCharacteristic(this.api.hap.Characteristic.CarbonDioxideLevel).updateValue(data.co2_in_aqin);
-          co2Sensor.getCharacteristic(this.api.hap.Characteristic.CarbonDioxidePeakLevel).updateValue(data.co2_in_24h_aqin);
+          co2Sensor=this.weatherStation.getService(this.Service.CarbonDioxideSensor);
+          co2Sensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          co2Sensor.getCharacteristic(this.Characteristic.CarbonDioxideLevel).updateValue(data.co2_in_aqin);
+          co2Sensor.getCharacteristic(this.Characteristic.CarbonDioxidePeakLevel).updateValue(data.co2_in_24h_aqin);
           if(data.co2_in_aqin > 1200){
-            co2Sensor.getCharacteristic(this.api.hap.Characteristic.CarbonDioxideDetected).updateValue(this.api.hap.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
+            co2Sensor.getCharacteristic(this.Characteristic.CarbonDioxideDetected).updateValue(this.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
           } else{
-            co2Sensor.getCharacteristic(this.api.hap.Characteristic.CarbonDioxideDetected).updateValue(this.api.hap.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+            co2Sensor.getCharacteristic(this.Characteristic.CarbonDioxideDetected).updateValue(this.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
           }
 
-          batteryStatus=this.weatherStation.getService(this.api.hap.Service.Battery);
-          batteryStatus.getCharacteristic(this.api.hap.Characteristic.StatusLowBattery).updateValue(!data.batt_co2);
+          batteryStatus=this.weatherStation.getService(this.Service.Battery);
+          batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_co2);
         }
       }
       if(this.showAirIn && data.pm25_in){
-        uuid = this.api.hap.uuid.generate('air_in');
+        uuid = this.genUUID('air_in');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
           this.weatherStation=this.accessories[index];
-          airSensor=this.weatherStation.getService(this.api.hap.Service.AirQualitySensor);
-          airSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          airSensor.getCharacteristic(this.api.hap.Characteristic.PM2_5Density).updateValue(data.pm25_in);
+          airSensor=this.weatherStation.getService(this.Service.AirQualitySensor);
+          airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          airSensor.getCharacteristic(this.Characteristic.PM2_5Density).updateValue(data.pm25_in);
 
           if(data.pm25_in >300) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.POOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.POOR);
           } else if(data.pm25_in >200) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.POOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.POOR);
           } else if(data.pm25_in >150) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.INFERIOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.INFERIOR);
           } else if(data.pm25_in >100) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.FAIR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.FAIR);
           } else if(data.pm25_in >50) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.GOOD);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.GOOD);
           } else if(data.pm25_in >0) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.EXCELLENT);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.EXCELLENT);
           } else {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.UNKNOWN);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.UNKNOWN);
           }
 
-          //batteryStatus=this.weatherStation.getService(this.api.hap.Service.Battery)
-          //batteryStatus.getCharacteristic(this.api.hap.Characteristic.StatusLowBattery).updateValue(!data.batt_25_in)//check for batt
+          //batteryStatus=this.weatherStation.getService(this.Service.Battery)
+          //batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25_in)//check for batt
         }
       }
       if(this.showAirOut && data.pm25){
-        uuid = this.api.hap.uuid.generate('air_out');
+        uuid = this.genUUID('air_out');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
           this.weatherStation=this.accessories[index];
-          airSensor=this.weatherStation.getService(this.api.hap.Service.AirQualitySensor);
-          airSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.NO_FAULT);
-          airSensor.getCharacteristic(this.api.hap.Characteristic.PM2_5Density).updateValue(data.pm25);
+          airSensor=this.weatherStation.getService(this.Service.AirQualitySensor);
+          airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
+          airSensor.getCharacteristic(this.Characteristic.PM2_5Density).updateValue(data.pm25);
 
           if(data.pm25 >300) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.POOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.POOR);
           } else if(data.pm25 >200) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.POOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.POOR);
           } else if(data.pm25 >150) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.INFERIOR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.INFERIOR);
           } else if(data.pm25 >100) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.FAIR);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.FAIR);
           } else if(data.pm25 >50) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.GOOD);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.GOOD);
           } else if(data.pm25 >0) {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.EXCELLENT);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.EXCELLENT);
           } else {
-            airSensor.getCharacteristic(this.api.hap.Characteristic.AirQuality).updateValue(this.api.hap.Characteristic.AirQuality.UNKNOWN);
+            airSensor.getCharacteristic(this.Characteristic.AirQuality).updateValue(this.Characteristic.AirQuality.UNKNOWN);
           }
 
-          batteryStatus=this.weatherStation.getService(this.api.hap.Service.Battery);
-          batteryStatus.getCharacteristic(this.api.hap.Characteristic.StatusLowBattery).updateValue(!data.batt_25 );
+          batteryStatus=this.weatherStation.getService(this.Service.Battery);
+          batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt_25 );
         }
       }
 
       if(this.customSensor.length){
         this.customSensor.forEach((device: any)=>{
-          uuid = this.api.hap.uuid.generate(device.name);
+          uuid = this.genUUID(device.name);
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             const value = data[device.dataPoint];
@@ -553,14 +559,14 @@ export class ambientPlatform implements DynamicPlatformPlugin {
             this.weatherStation=this.accessories[index];
             switch (device.type){
             case 0:
-              sensor=this.weatherStation.getService(this.api.hap.Service.MotionSensor);
-              sensor.getCharacteristic(this.api.hap.Characteristic.MotionDetected).updateValue(motion);
-              sensor.getCharacteristic(this.api.hap.Characteristic.CurrentAmbientLightLevel).updateValue(value);
+              sensor=this.weatherStation.getService(this.Service.MotionSensor);
+              sensor.getCharacteristic(this.Characteristic.MotionDetected).updateValue(motion);
+              sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
               break;
             case 1:
-              sensor=this.weatherStation.getService(this.api.hap.Service.OccupancySensor);
-              sensor.getCharacteristic(this.api.hap.Characteristic.OccupancyDetected).updateValue(motion);
-              sensor.getCharacteristic(this.api.hap.Characteristic.CurrentAmbientLightLevel).updateValue(value);
+              sensor=this.weatherStation.getService(this.Service.OccupancySensor);
+              sensor.getCharacteristic(this.Characteristic.OccupancyDetected).updateValue(motion);
+              sensor.getCharacteristic(this.Characteristic.CurrentAmbientLightLevel).updateValue(value);
               break;
             }
           }
@@ -582,93 +588,93 @@ export class ambientPlatform implements DynamicPlatformPlugin {
 
     try{
       if(this.showOutdoor){
-        uuid = this.api.hap.uuid.generate('station');
+        uuid = this.genUUID('station');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         this.weatherStation=this.accessories[index];
-        tempSensor=this.weatherStation.getService(this.api.hap.Service.TemperatureSensor);
-        tempSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
-        humditySensor=this.weatherStation.getService(this.api.hap.Service.HumiditySensor);
-        humditySensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+        tempSensor=this.weatherStation.getService(this.Service.TemperatureSensor);
+        tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+        humditySensor=this.weatherStation.getService(this.Service.HumiditySensor);
+        humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
       }
 
       if(this.showIndoor){
-        uuid = this.api.hap.uuid.generate('indoor');
+        uuid = this.genUUID('indoor');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         this.indoor=this.accessories[index];
-        tempSensor=this.indoor.getService(this.api.hap.Service.TemperatureSensor);
-        tempSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
-        humditySensor=this.indoor.getService(this.api.hap.Service.HumiditySensor);
-        humditySensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+        tempSensor=this.indoor.getService(this.Service.TemperatureSensor);
+        tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+        humditySensor=this.indoor.getService(this.Service.HumiditySensor);
+        humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
       }
 
       for (let n: number = 1; n <= this.maxTemp; n++) {
-        uuid = this.api.hap.uuid.generate('temp'+n);
+        uuid = this.genUUID('temp'+n);
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
           this.weatherStation=this.accessories[index];
-          tempSensor=this.weatherStation.getService(this.api.hap.Service.TemperatureSensor);
-          tempSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
-          humditySensor=this.indoor.getService(this.api.hap.Service.HumiditySensor);
-          humditySensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+          tempSensor=this.weatherStation.getService(this.Service.TemperatureSensor);
+          tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+          humditySensor=this.indoor.getService(this.Service.HumiditySensor);
+          humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
         }
       }
 
       for (let n: number = 1; n <= this.maxLeak; n++) {
-        uuid = this.api.hap.uuid.generate('leak'+n);
+        uuid = this.genUUID('leak'+n);
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
           this.weatherStation=this.accessories[index];
-          leakSensor=this.weatherStation.getService(this.api.hap.Service.LeakSensor);
-          leakSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+          leakSensor=this.weatherStation.getService(this.Service.LeakSensor);
+          leakSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
         }
       }
 
       if(this.showAqin){
-        uuid = this.api.hap.uuid.generate('aqin');
+        uuid = this.genUUID('aqin');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         this.aqin=this.accessories[index];
-        tempSensor=this.indoor1.getService(this.api.hap.Service.TemperatureSensor);
-        tempSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
-        humditySensor=this.indoor1.getService(this.api.hap.Service.HumiditySensor);
-        humditySensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
-        airSensor=this.weatherStation.getService(this.api.hap.Service.AirQualitySensor);
-        airSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
-        co2Sensor=this.weatherStation.getService(this.api.hap.Service.CarbonDioxideSensor);
-        co2Sensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+        tempSensor=this.indoor1.getService(this.Service.TemperatureSensor);
+        tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+        humditySensor=this.indoor1.getService(this.Service.HumiditySensor);
+        humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+        airSensor=this.weatherStation.getService(this.Service.AirQualitySensor);
+        airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
+        co2Sensor=this.weatherStation.getService(this.Service.CarbonDioxideSensor);
+        co2Sensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
       }
 
       if(this.showAirIn){
-        uuid = this.api.hap.uuid.generate('air_in');
+        uuid = this.genUUID('air_in');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         this.aqin=this.accessories[index];
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-        airSensor=this.weatherStation.getService(this.api.hap.Service.AirQualitySensor);
-        airSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+        airSensor=this.weatherStation.getService(this.Service.AirQualitySensor);
+        airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
       }
 
       if(this.showAirOut){
-        uuid = this.api.hap.uuid.generate('air_out');
+        uuid = this.genUUID('air_out');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         this.aqin=this.accessories[index];
-        airSensor=this.weatherStation.getService(this.api.hap.Service.AirQualitySensor);
-        airSensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+        airSensor=this.weatherStation.getService(this.Service.AirQualitySensor);
+        airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
       }
 
       if(this.customSensor.length){
         this.customSensor.forEach((device: any)=>{
           let sensor;
-          uuid = this.api.hap.uuid.generate(device.name);
+          uuid = this.genUUID(device.name);
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
           if(this.accessories[index]){
             this.weatherStation=this.accessories[index];
             switch (device.type){
             case 0:
-              sensor=this.weatherStation.getService(this.api.hap.Service.MotionSensor);
-              sensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+              sensor=this.weatherStation.getService(this.Service.MotionSensor);
+              sensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
               break;
             case 1:
-              sensor=this.weatherStation.getService(this.api.hap.Service.OccupancySensor);
-              sensor.getCharacteristic(this.api.hap.Characteristic.StatusFault).updateValue(this.api.hap.Characteristic.StatusFault.GENERAL_FAULT);
+              sensor=this.weatherStation.getService(this.Service.OccupancySensor);
+              sensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
               break;
             }
           }

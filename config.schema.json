@@ -117,6 +117,11 @@
 						}
 					}
 				}
+			},
+			"showSocketData":{
+				"title": "Show recived outdoor temperature in debug log",
+				"type": "boolean",
+				"default": false
 			}
 		}
 	},
@@ -167,6 +172,14 @@
 				"showOutdoorAir",
 				"showOtherTemp",
 				"showLeak"
+			]
+		},
+		{
+			"type": "flex",
+			"title": "Show extra information in debug log",
+			"flex-flow": "row wrap",
+			"items": [
+				"showSocketData"
 			]
 		},
 		{

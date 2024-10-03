@@ -1,25 +1,14 @@
 # Changes
 
+## 0.1.7
+update
+- code cleanup
+- added option to show a sample of recieved data in debug logging
+
 ## 0.1.6
 refactor
 - fixed crash on load
 - refactored with typescript
-
-## 0.1.5
-refactor
-- fixes for verification
-
-## 0.1.4
-refactor
-- fixes for verification
-
-## 0.1.3
-Initial
-- fixed crash condition
-
-## 0.1.2
-Initial
-- cleanup
 
 ## 0.1.0
 Initial
