@@ -1,6 +1,6 @@
 {
 	"pluginAlias": "ambient",
-	"headerDisplay": "Homebridge plugin for Ambient Realtime",
+	"headerDisplay": "Homebridge plugin for Ambient Realtime using realtime API",
 	"pluginType": "platform",
 	"singular": true,
 	"schema": {
@@ -73,7 +73,7 @@
 			"sensors": {
 				"title": "Sensors",
 				"type": "array",
-				"required": true,
+				"required": false,
 				"items": {
 					"title": "Custom Sensor",
 					"type": "object",
@@ -82,26 +82,26 @@
 							"title": "Name for this sensor",
 							"type": "string",
 							"minLength": 3,
-							"required": true,
+							"required": false,
 							"placeholder": "Wind"
 						},
 						"dataPoint": {
 							"title": "Data point to be measured for this sensor",
 							"type": "string",
 							"minLength": 2,
-							"required": true,
+							"required": false,
 							"placeholder": "windspeedmph"
 						},
 						"threshold": {
 							"title": "threshold exceeded to trigger detection",
 							"type": "number",
-							"required": true,
+							"required": false,
 							"placeholder": 4
 						},
 						"type": {
 							"title": "Show as sensor type",
 							"type": "integer",
-							"required": true,
+							"required": false,
 							"default": 0,
 							"description": "Select the controls to display in HomeKit.",
 							"oneOf": [
@@ -173,18 +173,18 @@
 		"type": "help",
 		"helpvalue": "<h5><b>Optional</b></h5><p class='help-block'> Reference Readme file <a target='blank' href='https://github.com/valiquette/homebridge-Ambient-realtime#readme'>here</a> for more information.</p>"
  		},
-	{
-		"key": "sensors",
-		"type": "tabarray",
-		"title": "{{ value.name || 'new Sensor' }}",
-		"description": "Create custom sensors to show in Homekit",
-		"expandable": true,
-		"items": [
-			"sensors[].name",
-			"sensors[].dataPoint",
-			"sensors[].threshold",
-			"sensors[].type"
-				]
-	}
+		{
+			"key": "sensors",
+			"type": "tabarray",
+			"title": "{{ value.name || 'new Sensor' }}",
+			"description": "Create custom sensors to show in Homekit",
+			"expandable": true,
+			"items": [
+				"sensors[].name",
+				"sensors[].dataPoint",
+				"sensors[].threshold",
+				"sensors[].type"
+			]
+		}
 	]
 }
