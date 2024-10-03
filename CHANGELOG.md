@@ -4,6 +4,7 @@
 update
 - code cleanup
 - added option to show a sample of recieved data in debug logging
+- fixed bug when setting fault status
 
 ## 0.1.6
 refactor

@@ -600,10 +600,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
       if(this.showIndoor){
         uuid = this.genUUID('indoor');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-        this.indoor=this.accessories[index];
-        tempSensor=this.indoor.getService(this.Service.TemperatureSensor);
+        this.weatherStation=this.accessories[index];
+        tempSensor=this.weatherStation.getService(this.Service.TemperatureSensor);
         tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
-        humditySensor=this.indoor.getService(this.Service.HumiditySensor);
+        humditySensor=this.weatherStation.getService(this.Service.HumiditySensor);
         humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
       }
 
@@ -632,10 +632,10 @@ export class ambientPlatform implements DynamicPlatformPlugin {
       if(this.showAqin){
         uuid = this.genUUID('aqin');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
-        this.aqin=this.accessories[index];
-        tempSensor=this.indoor1.getService(this.Service.TemperatureSensor);
+        this.weatherStation=this.accessories[index];
+        tempSensor=this.weatherStation.getService(this.Service.TemperatureSensor);
         tempSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
-        humditySensor=this.indoor1.getService(this.Service.HumiditySensor);
+        humditySensor=this.weatherStation.getService(this.Service.HumiditySensor);
         humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
         airSensor=this.weatherStation.getService(this.Service.AirQualitySensor);
         airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
@@ -681,7 +681,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
         });
       }
     }catch(err) {
-      this.log.error('Error setting fault status');
+      this.log.error('Error setting fault status',err);
     }
   }
 }
