@@ -1,5 +1,9 @@
 # Changes
 
+## 0.1.8
+update
+- fixed bug when no customer sensor are defined
+
 ## 0.1.7
 update
 - code cleanup

@@ -316,7 +316,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
           }
         }
 
-        if(this.customSensor.length){
+        if(Array.isArray(this.customSensor)){
           this.customSensor.forEach((sensor: any)=>{
             if(device.lastData[sensor.dataPoint]!=null){
               uuid = this.genUUID(sensor.name);
@@ -548,7 +548,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
         }
       }
 
-      if(this.customSensor.length){
+      if(Array.isArray(this.customSensor)){
         this.customSensor.forEach((device: any)=>{
           uuid = this.genUUID(device.name);
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
@@ -660,7 +660,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
         airSensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.GENERAL_FAULT);
       }
 
-      if(this.customSensor.length){
+      if(Array.isArray(this.customSensor)){
         this.customSensor.forEach((device: any)=>{
           let sensor;
           uuid = this.genUUID(device.name);
