@@ -1,8 +1,12 @@
 # Changes
 
+## 0.1.10
+update
+- fixed an issue with battery status
+
 ## 0.1.9
 update
-- fixed an issue where battery satus showed for device with no reported status
+- fixed an issue where battery status showed for device with no reported status
 
 ## 0.1.8
 update

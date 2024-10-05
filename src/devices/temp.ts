@@ -63,7 +63,7 @@ export class tempSensor {
 		  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, humdidity);
 
 		let batteryStatus=indoorSensor.getService(this.platform.Service.Battery);
-		if(device.lastData.battout !== undefined){
+		if(device.lastData.battin !== undefined){
 		  if(!batteryStatus){
 		  batteryStatus = new this.platform.Service.Battery(name);
 		  indoorSensor.addService(batteryStatus);
