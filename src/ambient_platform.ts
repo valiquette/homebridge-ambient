@@ -172,7 +172,9 @@ export class ambientPlatform implements DynamicPlatformPlugin {
             accessory = new station(this).createAccessory(device, uuid, this.accessories[index]);
             this.accessories.push(accessory);
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-          }
+          } else{
+					 accessory = new station(this).createAccessory(device, uuid, this.accessories[index]);
+					 }
         } else{
           uuid = this.genUUID('station');
           index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
@@ -192,6 +194,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
             accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
             this.accessories.push(accessory);
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+          } else{
+            accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
           }
         } else{
           if(this.showIndoor){
@@ -214,7 +218,9 @@ export class ambientPlatform implements DynamicPlatformPlugin {
             accessory = new aqinSensor(this).createAccessory(device, uuid, this.accessories[index]);
             this.accessories.push(accessory);
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-          }
+          } else {
+					 accessory = new aqinSensor(this).createAccessory(device, uuid, this.accessories[index]);
+					 }
         } else{
           if(this.showAqin){
             this.log.info('Skipping aqin, sensor not found');
@@ -236,7 +242,9 @@ export class ambientPlatform implements DynamicPlatformPlugin {
             accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'in');
             this.accessories.push(accessory);
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-          }
+          } else {
+					 accessory = new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'in');
+					 }
         } else{
           if(this.showAirIn){
             this.log.info('Skipping indoor air sensor not found');
@@ -257,6 +265,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
             accessory  =  new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'out');
             this.accessories.push(accessory);
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+          } else {
+            accessory  =  new airSensor(this).createAccessory(device, uuid, this.accessories[index], 'out');
           }
         } else{
           if(this.showAirOut){
@@ -281,6 +291,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
                 accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
                 this.accessories.push(accessory);
                 this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+              } else {
+                accessory = new tempSensor(this).createAccessory(device, uuid, this.accessories[index], name);
               }
             } else{
               this.log.debug('Skipping temp%s, sensor not found',n);
@@ -304,6 +316,8 @@ export class ambientPlatform implements DynamicPlatformPlugin {
                 accessory  =  new leakSensor(this).createAccessory(device, uuid, this.accessories[index], name);
                 this.accessories.push(accessory);
                 this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+              } else {
+                accessory  =  new leakSensor(this).createAccessory(device, uuid, this.accessories[index], name);
               }
             } else{
               this.log.debug('Skipping leak%s, sensor not found',n);
@@ -322,7 +336,6 @@ export class ambientPlatform implements DynamicPlatformPlugin {
               uuid = this.genUUID(sensor.name);
               index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
               if(this.accessories[index]){
-
                 const checkType: any =this.accessories[index].getService(this.Service.AccessoryInformation)!.getCharacteristic(this.Characteristic.ProductData);
                 if((checkType.value === 'motion' && sensor.type ===1 )|| (checkType.value === 'occupancy' && sensor.type === 0)){
                   this.log.warn('Changing sensor between Motion and Occupancy, check room assignments in Homekit');
@@ -338,7 +351,12 @@ export class ambientPlatform implements DynamicPlatformPlugin {
                 }
                 this.accessories.push(accessory);
                 this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-              }
+              } else {
+                switch (sensor.type){
+                case 0: accessory = new motionSensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
+                case 1: accessory = new occupancySensor(this).createAccessory(device, uuid, this.accessories[index], sensor); break;
+                }
+							 }
             } else{
               this.log.info('Skipping sensor not found');
               uuid = this.genUUID(sensor.name);
@@ -368,7 +386,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
     let index: any;
 
     try{
-      if(this.showOutdoor){
+      if(this.showOutdoor && data.tempf){
         uuid = this.genUUID('station');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
@@ -379,12 +397,14 @@ export class ambientPlatform implements DynamicPlatformPlugin {
           humditySensor=this.weatherStation.getService(this.Service.HumiditySensor);
           humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
           humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidity);
-          //batteryStatus=this.weatherStation.getService(this.Service.Battery)
-          //batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.batt) // no outdoor battery
+          batteryStatus=this.weatherStation.getService(this.Service.Battery);
+          if(batteryStatus){
+            batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.battout);
+          }
         }
       }
 
-      if(this.showIndoor && (data.tempinf)){
+      if(this.showIndoor && data.tempinf){
         uuid = this.genUUID('indoor');
         index = this.accessories.findIndex(accessory => accessory.UUID === uuid);
         if(this.accessories[index]){
@@ -396,7 +416,9 @@ export class ambientPlatform implements DynamicPlatformPlugin {
           humditySensor.getCharacteristic(this.Characteristic.StatusFault).updateValue(this.Characteristic.StatusFault.NO_FAULT);
           humditySensor.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).updateValue(data.humidityin);
           batteryStatus=this.weatherStation.getService(this.Service.Battery);
-          batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.battin);
+          if(batteryStatus){
+            batteryStatus.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(!data.battin);
+          }
         }
       }
 

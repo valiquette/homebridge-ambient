@@ -1,5 +1,9 @@
 # Changes
 
+## 0.1.9
+update
+- fixed an issue where battery satus showed for device with no reported status
+
 ## 0.1.8
 update
 - fixed bug when no customer sensor are defined

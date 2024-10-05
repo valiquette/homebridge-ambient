@@ -63,17 +63,24 @@ export class tempSensor {
 		  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, humdidity);
 
 		let batteryStatus=indoorSensor.getService(this.platform.Service.Battery);
-		if(!batteryStatus){
+		if(device.lastData.battout !== undefined){
+		  if(!batteryStatus){
 		  batteryStatus = new this.platform.Service.Battery(name);
 		  indoorSensor.addService(batteryStatus);
 
 		  batteryStatus
 		    .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
 		    .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
-		}
-		batteryStatus
+		  }
+		  batteryStatus
 		  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
 		  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, batt);
+
+		} else {
+		  if(batteryStatus){
+			 indoorSensor.removeService(batteryStatus);
+		  }
+		}
 
 		return indoorSensor;
   }

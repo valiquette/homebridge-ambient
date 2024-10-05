@@ -9,11 +9,11 @@ export class station {
 		private readonly platform: ambientPlatform,
   ){}
   createAccessory(device: any, uuid: string, weatherStation: PlatformAccessory) {
-    if(!weatherStation){
+		 if(!weatherStation){
       this.platform.log.info('Adding Outdoor sensors for %s', device.info.name);
       weatherStation = new this.platform.api.platformAccessory(device.info.name, uuid);
     } else{
-      this.platform.log.debug('update Accessory %s station', device.info.name);
+      this.platform.log.debug('update Accessory %s outdoor station', device.info.name);
     }
 			weatherStation.getService(this.platform.Service.AccessoryInformation)!
 			  .setCharacteristic(this.platform.Characteristic.Name, device.info.name)
@@ -56,17 +56,24 @@ export class station {
 			  .setCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, device.lastData.humidity);
 
 			let batteryStatus=weatherStation.getService(this.platform.Service.Battery);
-			if(!batteryStatus){
-			  batteryStatus = new this.platform.Service.Battery(name);
-			  weatherStation.addService(batteryStatus);
+			if(device.lastData.battout !== undefined){
+			  if(!batteryStatus){
+			    batteryStatus = new this.platform.Service.Battery(name);
+			    weatherStation.addService(batteryStatus);
 
+			    batteryStatus
+			      .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
+			      .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
+			  }
 			  batteryStatus
-			    .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
-			    .onGet(this.getStatusLowBattery.bind(this, batteryStatus));
+			    .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
+			    .setCharacteristic(this.platform.Characteristic.StatusLowBattery, !device.lastData.battout);
+
+			} else {
+			  if(batteryStatus){
+			   weatherStation.removeService(batteryStatus);
+			  }
 			}
-			batteryStatus
-			  .setCharacteristic(this.platform.Characteristic.Name, device.info.name+' '+name)
-			  .setCharacteristic(this.platform.Characteristic.StatusLowBattery, this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL);
 
 			return weatherStation;
   }
@@ -89,7 +96,7 @@ export class station {
     }
   }
 
-  async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
+	 async getStatusLowBattery(batteryStatus: Service): Promise<CharacteristicValue> {
     let currentValue: any = 0;
     try{
       currentValue = batteryStatus.getCharacteristic(this.platform.Characteristic.StatusLowBattery).value;
