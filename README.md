@@ -9,9 +9,10 @@
 
 <br> Supports Ambiant weather station and additional sensors using Ambiant's realtime API, no polling required, incoming data events are recieved once evey minute.
 <br> If you have more than one weather station on account you may filter the weather stations for each home based on the location name assigned in the app for the location you want to display in HomeKit.
-<br> Once the plugin starts the last data set ambient has will be shown in the log as the inital data from the subscribe event. Any item on that list can be configured as a custom sensor using these values as the data points. Note the examples in the sample config below. The actual recieved value will be stored in the sensor as light level value.
-<br> I can only test agaist the devices I have available. Other sensors have only been tested only agaist Ambient's API documentaion.
-<br>
+<br> Once the plugin starts the last data set Ambient has for your weather station will be shown in the homebridge log as the inital data from the subscribe event. Any item on that list can be configured as a custom sensor using those values as the data points. For details on these values see [Ambinet device specs](https://github.com/ambient-weather/api-docs/wiki/Device-Data-Specs).
+<br> Note the examples in the sample config below. The actual recieved value will be stored in the sensor as light level value.
+<br> I can test agaist the devices I have available, other sensors have only been tested agaist Ambient's API documentaion.
+<br> For now custom sensors only trigger when the threshold is exceeded.
 
 
 
