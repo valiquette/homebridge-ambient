@@ -3,6 +3,7 @@
 	"headerDisplay": "Homebridge plugin for Ambient Realtime",
 	"pluginType": "platform",
 	"singular": true,
+	"strictValidation": true,
 	"schema": {
 		"type": "object",
 		"properties": {

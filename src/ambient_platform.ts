@@ -68,7 +68,7 @@ export class ambientPlatform implements DynamicPlatformPlugin {
   //**
   //** REQUIRED - Homebridge will call the "configureAccessory" method once for every cached accessory restored
   //**
-	
+
   configureAccessory(accessory: PlatformAccessory){
     // Added cached devices to the accessories array
     this.log.debug('Found cached accessory %s with %s', accessory.displayName, accessory.services);
