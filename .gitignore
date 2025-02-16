@@ -5,6 +5,7 @@ dist
 .DS_Store
 Thumbs.db
 .vscode
+.prettierrc
 
 # Dependency directories
 node_modules/
